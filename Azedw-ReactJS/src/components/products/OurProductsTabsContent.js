@@ -1,5 +1,5 @@
-import React, {Fragment} from 'react';
-import productsData from "../../data/products";
+import React, {Fragment, useEffect, useState} from 'react';
+// import productsData from "../../data/products";
 import ProductItem from "./ProductItem";
 
 /**
@@ -10,7 +10,7 @@ import ProductItem from "./ProductItem";
  * @constructor
  */
 function OurProductsTabsContent({onQuickViewClick, tabSelected}) {
-
+    const [products, setProducts] = useState([]);
     /**
      * Shuffles array in place.
      * @param {Array} a items An array containing the items.
@@ -26,7 +26,31 @@ function OurProductsTabsContent({onQuickViewClick, tabSelected}) {
         return a;
     };
 
-    const products = shuffle(productsData);
+    const fetchProducts = async () => {
+        let result = null;
+        try {
+            const response = await fetch(`https://localhost:44344/api/Products`);
+
+            if (response.ok) {
+                result = await response.json();
+            } else {
+                console.log("Find books API error: " + response.statusText);
+            }
+        } catch (e) {
+            console.error("Error fetching data:", e);
+        }
+        return result;
+    };
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const result = await fetchProducts();
+            setProducts(shuffle(result));
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <Fragment>

@@ -65,7 +65,7 @@ function Deal() {
                             <div className="count-down-clock">
                                 <Countdown renderer={renderer} date={Date.now() + 999990000}/>
                             </div>
-                            <Link className="theme-btn-s5" to="/shop-right-sidebar">
+                            <Link className="theme-btn-s5" to="/shop-full-width">
                                 Shop now
                             </Link>
                         </div>

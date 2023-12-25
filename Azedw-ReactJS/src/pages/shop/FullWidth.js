@@ -1,60 +1,53 @@
-import React, {useState, Fragment} from 'react';
-
-import Footer from '../../components/global/Footer';
-import Instagram from '../../components/global/Instagram';
+import React, { useState, useEffect, Fragment } from 'react';
 import Header from '../../components/header/Header';
 import PageTitle from '../../components/global/PageTitle';
+import OrderingToolbar from '../../components/shop/OrderingToolbar';
 import Ordering from '../../components/shop/Ordering';
+import Products from '../../components/shop/Products';
 import QuickView from '../../components/products/QuickView';
-import Pagination from "../../components/global/Pagination";
-import OrderingToolbar from "../../components/shop/OrderingToolbar";
-import Products from "../../components/shop/Products";
+import Pagination from '../../components/global/Pagination';
+import Instagram from '../../components/global/Instagram';
+import Footer from '../../components/global/Footer';
 
 import './shop.css';
 
-/**
- * demo data
- */
-import productsData from '../../data/products.json';
-import productsData_2 from '../../data/products.json';
-import productsData_3 from '../../data/products.json';
-const products = [...productsData, ...productsData_2, ...productsData_3];
-
-/**
- * Shop page Full Width
- * @param options
- * @returns {*}
- * @constructor
- */
 function FullWidth({ options }) {
-
-    /**
-     * states
-     */
     const [showQuickView, setShowQuickView] = useState(false);
     const [quickViewData, setQuickViewData] = useState({});
     const [ordering, setOrdering] = useState(1);
+    const [products, setProducts] = useState([]);
+    const [selectedProductId, setSelectedProductId] = useState(null);
 
-    /**
-     * Handle Ordering Status
-     */
+    const fetchProducts = async () => {
+        try {
+            const response = await fetch('https://localhost:44344/api/Products');
+            if (response.ok) {
+                const result = await response.json();
+                setProducts(result);
+            } else {
+                console.error('Fetch products API error: ' + response.statusText);
+            }
+        } catch (e) {
+            console.error('Error fetching data:', e);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
     const HandleOrderingStatus = (event, data) => {
         event.preventDefault();
         setOrdering(data);
     };
 
-    /**
-     * Handel Quick View Data
-     */
     const HandelQuickViewData = (e, item) => {
         e.preventDefault();
         setShowQuickView(!showQuickView);
         setQuickViewData(item);
+        setSelectedProductId(item.id);
     };
 
-    /**
-     * Handel Quick View Close
-     */
     const HandelQuickViewClose = (e) => {
         e.preventDefault();
         setShowQuickView(false);
@@ -63,21 +56,16 @@ function FullWidth({ options }) {
 
     return (
         <Fragment>
-
-            {showQuickView
-                ? <QuickView
-                    data={quickViewData}
-                    onQuickViewCloseClick={HandelQuickViewClose}
-                />
-                : ''
-            }
+            {showQuickView ? (
+                <QuickView data={quickViewData} onQuickViewCloseClick={HandelQuickViewClose} />
+            ) : (
+                ''
+            )}
 
             <Header options={options} />
 
-            <PageTitle name="Shop"/>
+            <PageTitle name="Shop" />
 
-
-            {/* start shop-section */}
             <section className="shop-section shop-style-2 section-padding">
                 <div className="container-1410">
                     <div className="row">
@@ -87,37 +75,32 @@ function FullWidth({ options }) {
                                     <div className="woocommerce-content-inner">
                                         <div className="woocommerce-toolbar-top">
                                             <p className="woocommerce-result-count">
-                                                Showing all {products.length} results
+                                                Showing all {Array.isArray(products) ? products.length : 0} results
                                             </p>
 
-                                            <OrderingToolbar
-                                                HandleOrderingStatus={HandleOrderingStatus}
-                                                ordering={ordering}
-                                            />
+                                            <OrderingToolbar HandleOrderingStatus={HandleOrderingStatus} ordering={ordering} />
 
-                                            <Ordering/>
+                                            <Ordering />
                                         </div>
 
                                         <Products
                                             HandelQuickViewData={HandelQuickViewData}
-                                            products={products}
+                                            products={Array.isArray(products) ? products : []}
                                             ordering={ordering}
+                                            selectedProductId = {selectedProductId}
                                         />
-
                                     </div>
 
-                                    <Pagination extraClass=""/>
+                                    <Pagination extraClass="" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                {/* end container */}
             </section>
-            {/* end shop-section */}
 
-            <Instagram/>
-            <Footer/>
+            <Instagram />
+            <Footer />
         </Fragment>
     );
 }

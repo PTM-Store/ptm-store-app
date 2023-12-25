@@ -9,14 +9,14 @@ import {Link} from "react-router-dom";
  * @returns {*}
  * @constructor
  */
-function Products({HandelQuickViewData, products, ordering}) {
+function Products({HandelQuickViewData, products, ordering, selectedProductId}) {
 
     return (
         <Fragment>
             <ul className={"products " + (ordering == 1 ? 'default-column' : ordering == 2 ? 'three-column' : ordering == 3 ? 'list-view' : '')}>
                 {
                     products.map((item, index) => (
-                        <li key={index} className="product">
+                        <li key={index} className={`product ${item.id === selectedProductId ? 'selected' : ''}`}>
                             <div className="product-holder">
                                 {parseInt(item.price) < parseInt(item.oldPrice) ?
                                     <div className="product-badge discount">
@@ -25,7 +25,7 @@ function Products({HandelQuickViewData, products, ordering}) {
                                         }
                                         %</div> : ''
                                 }
-                                <Link to="/single-slider-images">
+                                <Link to={`/single-slider-images/${item.id}`}>
                                     <img loading="lazy" src={process.env.PUBLIC_URL + item.mainImg} alt=""/>
                                 </Link>
                                 <div className="shop-action-wrap">
@@ -63,7 +63,7 @@ function Products({HandelQuickViewData, products, ordering}) {
                                     <ins>
                                         <span className="woocommerce-Price-amount amount">
                                             <bdi>
-                                                <span className="woocommerce-Price-currencySymbol">{item.Symbol}</span>
+                                                <span className="woocommerce-Price-currencySymbol">{item.symbol !== undefined && item.symbol !== null ? String(item.symbol) : ''}</span>
                                                 {item.price}
                                             </bdi>
                                         </span>
@@ -72,7 +72,7 @@ function Products({HandelQuickViewData, products, ordering}) {
                                         <del>
                                             <span className="woocommerce-Price-amount amount">
                                             <bdi><span
-                                                className="woocommerce-Price-currencySymbol">{item.Symbol}</span>{item.oldPrice}</bdi>
+                                                className="woocommerce-Price-currencySymbol">{item.symbol !== undefined && item.symbol !== null ? String(item.symbol) : ''}</span>{item.oldPrice}</bdi>
                                             </span>
                                         </del> : ''
                                     }

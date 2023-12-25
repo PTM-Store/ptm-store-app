@@ -1,5 +1,6 @@
-import React, {useState, Fragment} from 'react';
-import Slider from "react-slick";
+import React, { useState, Fragment, useEffect } from 'react';
+import { useParams } from "react-router-dom";
+import Slider from 'react-slick';
 
 import Footer from '../../components/global/Footer';
 import Instagram from '../../components/global/Instagram';
@@ -11,63 +12,48 @@ import RecentSingleProducts from '../../components/products/RecentSingleProducts
 
 import './shop.css';
 
-/**
- * demo data
- */
-import data from '../../data/singleProductDemo.json';
-
-/**
- * single shop page with  Slider Images
- * @param options
- * @returns {*}
- * @constructor
- */
-function ShopSliderImages({options}) {
-
-    /**
-     * states
-     */
+function ShopSliderImages({ options }) {
     const [showQuickView, setShowQuickView] = useState(false);
     const [quickViewData, setQuickViewData] = useState({});
     const [productCount, setProductCount] = useState(1);
+    const [data, setData] = useState({});
+    const { id } = useParams();
 
-    /**
-     * Handle Product Count
-     */
-    const HandleProductCount = (e, data) => {
-        e.preventDefault();
-        if (data == 'plus') {
-            setProductCount(productCount + 1);
-        } else {
-            if (productCount > 1) {
-                setProductCount(productCount - 1);
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`https://localhost:44344/api/Products/${id}`);
+            if (response.ok) {
+                const result = await response.json();
+                setData(result);
             } else {
-                setProductCount(1);
+                console.log('Failed to fetch data');
             }
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
     };
 
-    /**
-     * Handel Quick View Data
-     */
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const HandleProductCount = (e, type) => {
+        e.preventDefault();
+        setProductCount((prevCount) => (type === 'plus' ? prevCount + 1 : Math.max(prevCount - 1, 1)));
+    };
+
     const HandelQuickViewData = (e, item) => {
         e.preventDefault();
         setShowQuickView(!showQuickView);
         setQuickViewData(item);
     };
 
-    /**
-     * Handel Quick View Close
-     */
     const HandelQuickViewClose = (e) => {
         e.preventDefault();
         setShowQuickView(false);
         setQuickViewData({});
     };
 
-    /**
-     * slider settings
-     */
     const settings = {
         dots: false,
         infinite: true,
@@ -81,71 +67,73 @@ function ShopSliderImages({options}) {
 
     return (
         <Fragment>
-            {showQuickView
-                ? <QuickView
-                    data={quickViewData}
-                    onQuickViewCloseClick={HandelQuickViewClose}
-                />
-                : ''
-            }
+            {showQuickView && <QuickView data={quickViewData} onQuickViewCloseClick={HandelQuickViewClose} />}
 
-            <Header options={options}/>
+            <Header options={options} />
 
-            <PageTitle name="Shop single"/>
+            <PageTitle name="Shop single" />
 
-            {/* start shop-single-section */}
             <section className="shop-single-section section-padding">
                 <div className="container-1410">
                     <div className="row">
                         <div className="col col-md-6">
                             <div className="shop-single-slider slider-thumbnail">
                                 <Slider {...settings}>
-                                    {
-                                        data.images.map((item, index) => (
+                                    {data.gallery &&
+                                        data.gallery.map((item, index) => (
                                             <div key={index}>
-                                                <img src={process.env.PUBLIC_URL + item.src}/>
+                                                <img src={process.env.PUBLIC_URL + item.img} alt={`Product ${index}`} />
                                             </div>
-                                        ))
-                                    }
+                                        ))}
                                 </Slider>
                                 <div className="slider-nav"></div>
                             </div>
                         </div>
                         <div className="col col-md-6">
                             <div className="product-details">
-                                <h2>{data.name}</h2>
+                                <h2>{data.title}</h2>
                                 <div className="price">
-                                    <span className="current">{data.symbol}{data.price}</span>
-                                    <span className="old">{data.symbol}{data.oldPrice}</span>
+                                    <span className="current">
+                                        {data.symbol != null && data.price != null ? data.symbol + data.price : ''}
+                                    </span>
+                                    <span className="old">
+                                        {data.symbol != null && data.oldPrice != null ? data.symbol + data.oldPrice : ''}
+                                    </span>
                                 </div>
                                 <div className="rating">
-                                    <i className="fi flaticon-star"/>
-                                    <i className="fi flaticon-star"/>
-                                    <i className="fi flaticon-star"/>
-                                    <i className="fi flaticon-star"/>
-                                    <i className="fi flaticon-star-social-favorite-middle-full"/>
-                                    <span>{data.reviewCount}</span>
+                                    <i className="fi flaticon-star" />
+                                    <i className="fi flaticon-star" />
+                                    <i className="fi flaticon-star" />
+                                    <i className="fi flaticon-star" />
+                                    <i className="fi flaticon-star-social-favorite-middle-full" />
                                 </div>
-                                <p>{data.shortDescription}</p>
                                 <div className="product-option">
                                     <form className="form">
                                         <div className="product-row">
                                             <div className="touchspin-wrap">
                                                 <button
-                                                    onClick={(e) => {
-                                                        HandleProductCount(e, 'plus')
-                                                    }} id="slider-thumbnail-touchspin-up" className="btn btn-default "
-                                                    type="button"><i className="glyphicon glyphicon-chevron-up"></i>
+                                                    onClick={(e) => HandleProductCount(e, 'plus')}
+                                                    id="slider-thumbnail-touchspin-up"
+                                                    className="btn btn-default "
+                                                    type="button"
+                                                >
+                                                    <i className="glyphicon glyphicon-chevron-up"></i>
                                                 </button>
                                                 <button
-                                                    onClick={(e) => {
-                                                        HandleProductCount(e, 'minus')
-                                                    }}
-                                                    id="slider-thumbnail-touchspin-down" className="btn btn-default "
-                                                    type="button"><i className="glyphicon glyphicon-chevron-down"></i>
+                                                    onClick={(e) => HandleProductCount(e, 'minus')}
+                                                    id="slider-thumbnail-touchspin-down"
+                                                    className="btn btn-default "
+                                                    type="button"
+                                                >
+                                                    <i className="glyphicon glyphicon-chevron-down"></i>
                                                 </button>
-                                                <input readOnly className="product-count" type="text"
-                                                       value={productCount} name="product-count"/>
+                                                <input
+                                                    readOnly
+                                                    className="product-count"
+                                                    type="text"
+                                                    value={productCount}
+                                                    name="product-count"
+                                                />
                                             </div>
                                             <div>
                                                 <button type="submit">Add to cart</button>
@@ -156,57 +144,51 @@ function ShopSliderImages({options}) {
                                 <div className="thb-product-meta-before">
                                     <div className="add-to-wishlist">
                                         <a href="#" className="add_to_wishlist">
-                                            <i className="pe-7s-like"/>
+                                            <i className="pe-7s-like" />
                                             <span>Add To Wishlist</span>
                                         </a>
                                     </div>
                                     <div className="product_meta">
-                                        <span className="sku_wrapper">SKU: <span
-                                            className="sku">{data.sku}</span></span>
-                                        <span className="posted_in">Categories:
-                                            {
-                                                data.categories.map((item, index) =>
-                                                    <a key={index}
-                                                       href={item.link}>
+                                        <span className="sku_wrapper">
+                                            SKU: <span className="sku">{data.sku != null ? data.sku : ''}</span>
+                                        </span>
+                                        <span className="posted_in">
+                                            Categories:
+                                            {data.categories &&
+                                                data.categories.map((item, index) => (
+                                                    <a key={index} href={item.link}>
                                                         {item.name} {data.categories.length - 1 === index ? '' : ','}
                                                     </a>
-                                                )
-                                            }
+                                                ))}
                                         </span>
-                                        <span className="tagged_as">Tags:
-                                            {
-                                                data.tags.map((item, index) =>
-                                                    <a key={index}
-                                                       href={item.link}>
+                                        <span className="tagged_as">
+                                            Tags:
+                                            {data.tags &&
+                                                data.tags.map((item, index) => (
+                                                    <a key={index} href={item.link}>
                                                         {item.name} {data.tags.length - 1 === index ? '' : ','}
                                                     </a>
-                                                )
-                                            }
+                                                ))}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {/* end col */}
                     </div>
-                    {/* end row */}
                     <div className="row">
                         <div className="col col-md-8 col-md-offset-2">
-                            <ProductInfoTabs/>
+                            <ProductInfoTabs />
                         </div>
                     </div>
-                    {/* end row */}
                     <div className="row">
                         <div className="col col-xs-12">
-                            <RecentSingleProducts onQuickViewClick={HandelQuickViewData}/>
+                            <RecentSingleProducts onQuickViewClick={HandelQuickViewData} />
                         </div>
                     </div>
                 </div>
-                {/* end of container */}
             </section>
-            {/* end of shop-single-section */}
-            <Instagram/>
-            <Footer/>
+            <Instagram />
+            <Footer />
         </Fragment>
     );
 }

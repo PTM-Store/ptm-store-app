@@ -180,7 +180,7 @@ function App() {
                         {/*    <SingleVerticalThumbnail options={options}/>*/}
                         {/*</Route>*/}
 
-                        <Route exact path="/single-slider-images">
+                        <Route exact path="/single-slider-images/:id">
                             <ShopSliderImages options={options}/>
                         </Route>
 

@@ -38,7 +38,7 @@ function MyAccount({ options }) {
                 const data = await response.json();
                 console.log(data);
 
-                if (data !== null) {
+                if (data.success) {
                     window.localStorage.setItem('token', data.accessToken);
                     history.push("/");
                 } else {

@@ -22,7 +22,7 @@ function ProductItem({onQuickViewClick, item}) {
                             }
                             %</div> : ''
                     }
-                    <NavLink to="/single-slider-images" >
+                    <NavLink to={`/single-slider-images/${item.id}`} >
                         <img loading="lazy" src={process.env.PUBLIC_URL + item.mainImg} alt=""/>
                     </NavLink>
                     <div className="shop-action-wrap">
