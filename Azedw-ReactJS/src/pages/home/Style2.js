@@ -10,8 +10,8 @@ import Footer from '../../components/global/Footer';
 import Feature1 from '../../components/features/Feature1';
 import OurProducts from '../../components/products/OurProducts';
 import Deal from '../../components/features/Deal';
-import Partners from '../../components/features/Partners';
-import FromOurBlog from '../../components/blog/FromOurBlog';
+// import Partners from '../../components/features/Partners';
+// import FromOurBlog from '../../components/blog/FromOurBlog';
 
 /**
  * Home page 2

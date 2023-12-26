@@ -39,7 +39,9 @@ function MyAccount({ options }) {
                 console.log(data);
 
                 if (data.success) {
-                    window.localStorage.setItem('token', data.accessToken);
+                    window.localStorage.setItem('token', data.data.accessToken);
+                    window.localStorage.setItem('userId', data.data.userId);
+                    alert('Login successfully');
                     history.push("/");
                 } else {
                     alert('Invalid email or password');

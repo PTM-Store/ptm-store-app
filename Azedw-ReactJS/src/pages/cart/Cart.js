@@ -1,4 +1,4 @@
- import React, {Fragment} from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import Footer from '../../components/global/Footer';
 import Instagram from '../../components/global/Instagram';
@@ -10,49 +10,37 @@ import CalculatedShipping from "../../components/cart/CalculatedShipping";
 
 import './cart.css';
 
-/**
- * Cart page
- * @param options
- * @returns {*}
- * @constructor
- */
 function Cart({ options }) {
+    const [cartItemData, setCartItemData] = useState([]);
+    const userId = localStorage.getItem('userId');
 
-    /**
-     * demo data
-     */
-    const cartItemData = [
-        {
-            id: 8,
-            sku: "",
-            img: "/assets/images/cart/img-1.jpg",
-            link: "#",
-            name: "Checked Hoodies Woo",
-            currencySymbol: "£",
-            price: "165.00",
-            qty: 2,
-            total: "330.00"
-        },
-        {
-            id: 21,
-            sku: "",
-            img: "/assets/images/cart/img-2.jpg",
-            link: "#",
-            name: "product2",
-            currencySymbol: "£",
-            price: "100.00",
-            qty: 1,
-            total: "100.00"
+    const fetchCartLines = async () => {
+        try {
+            const response = await fetch(`https://localhost:44344/api/CartLines/${userId}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (Array.isArray(result)) {
+                    setCartItemData(result);
+                } else {
+                    console.error('Invalid data format. Expected an array.');
+                }
+            } else {
+                console.log('Fetch products API error: ' + response.statusText);
+            }
+        } catch (e) {
+            console.error('Error fetching data:', e);
         }
-    ];
+    };
+
+    useEffect(() => {
+        fetchCartLines();
+    }, [userId]);
 
     return (
         <Fragment>
             <Header options={options} />
-
             <PageTitle name="Cart"/>
 
-            {/* start cart-section */}
             <section className="cart-section woocommerce-cart section-padding">
                 <div className="container-1410">
                     <div className="row">
@@ -71,12 +59,10 @@ function Cart({ options }) {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {
-                                            cartItemData.map((item, index) => (
-                                                <CartItem key={index} data={item}/>
-                                            ))
-                                        }
-                                        <Coupon/>
+                                        {cartItemData.map((item, index) => (
+                                            <CartItem key={index} data={item} />
+                                        ))}
+                                        <Coupon />
                                         </tbody>
                                     </table>
                                 </form>
@@ -88,7 +74,6 @@ function Cart({ options }) {
                     </div>
                 </div>
             </section>
-            {/* end cart-section */}
 
             <Instagram/>
             <Footer/>
