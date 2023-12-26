@@ -1,7 +1,6 @@
 import React, { useState, Fragment, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from 'react-router-dom';
 import Slider from 'react-slick';
-
 import Footer from '../../components/global/Footer';
 import Instagram from '../../components/global/Instagram';
 import PageTitle from '../../components/global/PageTitle';
@@ -18,6 +17,8 @@ function ShopSliderImages({ options }) {
     const [productCount, setProductCount] = useState(1);
     const [data, setData] = useState({});
     const { id } = useParams();
+    const userId = localStorage.getItem('userId');
+    const history = useHistory();
 
     const fetchData = async () => {
         try {
@@ -30,6 +31,42 @@ function ShopSliderImages({ options }) {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+    };
+
+    const addToCart = async (productId, quantity, e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                alert('You have to log in!!!');
+                history.push('/my-account');
+                return;
+            }
+
+            const response = await fetch(`https://localhost:44344/api/CartLines/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    quantity: quantity,
+                    cartId: 0,
+                    productId: productId,
+                }),
+            });
+
+            if (response.ok) {
+                console.log('Product successfully added to the cart!');
+            } else {
+                alert('You have to login!!!');
+                history.push("/my-account");
+                console.error('Error adding to cart API: ' + response.statusText);
+            }
+        } catch (error) {
+            console.error('Error calling add to cart API:', error);
         }
     };
 
@@ -93,12 +130,8 @@ function ShopSliderImages({ options }) {
                             <div className="product-details">
                                 <h2>{data.title}</h2>
                                 <div className="price">
-                                    <span className="current">
-                                        {data.symbol != null && data.price != null ? data.symbol + data.price : ''}
-                                    </span>
-                                    <span className="old">
-                                        {data.symbol != null && data.oldPrice != null ? data.symbol + data.oldPrice : ''}
-                                    </span>
+                                    <span className="current">{data.symbols + data.price}</span>
+                                    <span className="old">{data.symbols + data.oldPrice}</span>
                                 </div>
                                 <div className="rating">
                                     <i className="fi flaticon-star" />
@@ -108,7 +141,7 @@ function ShopSliderImages({ options }) {
                                     <i className="fi flaticon-star-social-favorite-middle-full" />
                                 </div>
                                 <div className="product-option">
-                                    <form className="form">
+                                    <form className="form" onSubmit={(e) => addToCart(id, productCount, e)}>
                                         <div className="product-row">
                                             <div className="touchspin-wrap">
                                                 <button
